@@ -3,7 +3,7 @@ function theta=cal_direction_s(t1,t2,t3)
 
 c = 343;  % velocity of sound
 A1 = c*t1/0.1;
-display(A1);
+% display(A1);
 theta_1=acos(A1/sqrt(2))-pi/4;
 A2 = c*t2/0.1;
 theta_2=-acos(A2/sqrt(2))+pi/4;

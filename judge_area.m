@@ -6,7 +6,7 @@ if min(y1_init)~=0
 end
 
 a=find(y1_init==0);
-display(a);
+% display(a);
 len=length(a);
 
 if len==1

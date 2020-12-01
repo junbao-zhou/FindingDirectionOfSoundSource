@@ -1,10 +1,14 @@
 clc;clear all; close all;
 
-sound_index = 14;
+sound_index = 1;
 is_plot = false;
+
+
+for sound_index = 2:14
 
 % 数据录入
 path = './train';
+y = [];
 for i = 1:4
     [y(i,:),fs1]=audioread(['train/',num2str(sound_index),'_mic',num2str(i),'.wav']);
 end
@@ -21,6 +25,7 @@ end
 
 % pre
 pre_emphasis=0.97;
+y_pre = [];
 for i = 1:4
     y_pre(i,:)=filter([1,-pre_emphasis],1,y(i,:));
 end
@@ -62,7 +67,9 @@ switch label
         theta=cal_direction_b(t1,t2,t3)-pi/2;
 end
 
+theta = real(theta) / pi * 180
 
+end
 
 
 
