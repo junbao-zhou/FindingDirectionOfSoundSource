@@ -4,7 +4,7 @@ sound_index = 1;
 is_plot = false;
 
 
-for sound_index = 2:14
+for sound_index = 1:14
 
 % 数据录入
 path = './train';
@@ -45,33 +45,28 @@ y_pre_norm = y_pre*1.0./max(y_pre,[],2);
  
 %找起始点：
 y_init=[find(y_pre_norm(1,:),1) find(y_pre_norm(2,:),1) find(y_pre_norm(3,:),1) find(y_pre_norm(4,:),1)];
+y_init=[0 find_delay(y(1,:),y(2,:)) find_delay(y(1,:),y(3,:)) find_delay(y(1,:),y(4,:))];
 
 %判定使用区域： judge_area()函数
-[t1,t2,t3,label]=judge_area(y_init,fs1);
-switch label
-    case 1
-        theta=cal_direction_b(t1,t2,t3);
-    case 2
-        theta=cal_direction_s(t1,t2,t3);
-    case 3
-        theta=cal_direction_b(t1,t2,t3)-pi*3/2;
-    case 4
-        theta=cal_direction_s(t1,t2,t3)+pi/2;
-    case 5
-        theta=cal_direction_b(t1,t2,t3)-pi;
-    case 6
-        theta=cal_direction_b(t1,t2,t3)+pi;
-    case 7
-        theta=cal_direction_b(t1,t2,t3)+3*pi/2;
-    case 8
-        theta=cal_direction_b(t1,t2,t3)-pi/2;
+[t1, t2, t3, min_index, diff] = judge_area(y_init,fs1);
+
+c = 343;
+distance = [t1, t2, t3] * c;
+
+theta = calc_direction(distance);
+
+if diff == 1
+    theta = -theta;
 end
 
-theta = real(theta) / pi * 180
+theta = theta + (min_index - 1) * pi / 2;
+
+theta = real(theta) / pi * 180;
+theta_record(sound_index) = mod(theta,360);
 
 end
 
 
-
+theta_record'
 
 
