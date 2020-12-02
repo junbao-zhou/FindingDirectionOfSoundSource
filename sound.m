@@ -3,6 +3,21 @@ clc;clear all; close all;
 sound_index = 1;
 is_plot = false;
 
+standard_angle =  [
+   3.1500000e+02,
+   3.5800000e+02,
+   1.0700000e+02,
+   1.5400000e+02,
+   4.8000000e+01,
+   2.0100000e+02,
+   3.0300000e+02,
+   8.4000000e+01,
+   1.1900000e+02,
+   3.4900000e+02,
+   2.1800000e+02,
+   1.0700000e+02,
+   2.9700000e+02,
+   1.0900000e+02]
 
 for sound_index = 1:14
 
@@ -67,6 +82,7 @@ theta_record(sound_index) = mod(theta,360);
 end
 
 
-theta_record'
+theta_record = theta_record'
 
+mse = mean((theta_record - standard_angle).^2)
 
