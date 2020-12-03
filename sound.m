@@ -25,7 +25,7 @@ for sound_index = 1:14
 path = './train';
 y = [];
 for i = 1:4
-    [y(i,:),fs1]=audioread(['train/',num2str(sound_index),'_mic',num2str(i),'.wav']);
+    [y(i,:),fs]=audioread(['train/',num2str(sound_index),'_mic',num2str(i),'.wav']);
 end
 t=1:1:size(y,2);
 
@@ -38,32 +38,39 @@ if is_plot
     end
 end
 
-% pre
-pre_emphasis=0.97;
-y_pre = [];
-for i = 1:4
-    y_pre(i,:)=filter([1,-pre_emphasis],1,y(i,:));
-end
+% % pre
+% pre_emphasis=0.97;
+% y_pre = [];
+% for i = 1:4
+%     y_pre(i,:)=filter([1,-pre_emphasis],1,y(i,:));
+% end
+% 
+% %draw post-pre 
+% if is_plot
+%     figure(2);
+%     for i = 1:4
+%         subplot(2,2,i);
+%         stem(t,y_pre(i,:));
+%     end
+% end
+% 
+% y_pre_norm = y_pre*1.0./max(y_pre,[],2);
+% %figure(3);
+% %stem(t,y1_pre);
+%  
+% %找起始点：
+% y_init=[find(y_pre_norm(1,:),1) find(y_pre_norm(2,:),1) find(y_pre_norm(3,:),1) find(y_pre_norm(4,:),1)];
 
-%draw post-pre 
-if is_plot
-    figure(2);
-    for i = 1:4
-        subplot(2,2,i);
-        stem(t,y_pre(i,:));
-    end
-end
+%% correlate
+% t_delay = [0 find_delay(y(1,:),y(2,:)) find_delay(y(1,:),y(3,:)) find_delay(y(1,:),y(4,:))] / fs;
 
-y_pre_norm = y_pre*1.0./max(y_pre,[],2);
-%figure(3);
-%stem(t,y1_pre);
- 
-%找起始点：
-y_init=[find(y_pre_norm(1,:),1) find(y_pre_norm(2,:),1) find(y_pre_norm(3,:),1) find(y_pre_norm(4,:),1)];
-y_init=[0 find_delay(y(1,:),y(2,:)) find_delay(y(1,:),y(3,:)) find_delay(y(1,:),y(4,:))];
+%% gccphat
+t_delay = [0 gccphat(y(2,:)',y(1,:)',fs) gccphat(y(3,:)',y(1,:)',fs) gccphat(y(4,:)',y(1,:)',fs)];
+
+%%
 
 %判定使用区域： judge_area()函数
-[t1, t2, t3, min_index, diff] = judge_area(y_init,fs1);
+[t1, t2, t3, min_index, diff] = judge_area(t_delay);
 
 c = 343;
 distance = [t1, t2, t3] * c;
@@ -84,5 +91,9 @@ end
 
 theta_record = theta_record'
 
-mse = mean((theta_record - standard_angle).^2)
+err = theta_record - standard_angle;
+err = mod(err,360);
+err = err - 360 * (err>180);
+
+abse = mean(abs(err))
 
