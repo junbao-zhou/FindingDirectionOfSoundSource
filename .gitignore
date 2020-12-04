@@ -1,4 +1,3 @@
 *.pdf
-train
-test
 *.asv
+**/*.wav

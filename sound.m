@@ -2,30 +2,25 @@ clc;clear all; close all;
 
 sound_index = 1;
 is_plot = false;
+is_filter = true;
 
-standard_angle =  [
-   3.1500000e+02,
-   3.5800000e+02,
-   1.0700000e+02,
-   1.5400000e+02,
-   4.8000000e+01,
-   2.0100000e+02,
-   3.0300000e+02,
-   8.4000000e+01,
-   1.1900000e+02,
-   3.4900000e+02,
-   2.1800000e+02,
-   1.0700000e+02,
-   2.9700000e+02,
-   1.0900000e+02]
+load train/angle.txt
+
+path = './train/';
 
 for sound_index = 1:14
 
 % 数据录入
-path = './train';
 y = [];
 for i = 1:4
-    [y(i,:),fs]=audioread(['train/',num2str(sound_index),'_mic',num2str(i),'.wav']);
+    [y(i,:),fs]=audioread([path,num2str(sound_index),'_mic',num2str(i),'.wav']);
+    if is_filter
+%         f_y = fft(y(i,:));
+%         stop_index = 2400 / fs * length(f_y);
+%         f_y(stop_index: end - stop_index) = 0;
+%         y(i,:) = ifft(f_y);
+    y(i,:) = filter( normalize(ones(1,7),'norm',1), 1, y(i,:));
+    end
 end
 t=1:1:size(y,2);
 
@@ -38,34 +33,12 @@ if is_plot
     end
 end
 
-% % pre
-% pre_emphasis=0.97;
-% y_pre = [];
-% for i = 1:4
-%     y_pre(i,:)=filter([1,-pre_emphasis],1,y(i,:));
-% end
-% 
-% %draw post-pre 
-% if is_plot
-%     figure(2);
-%     for i = 1:4
-%         subplot(2,2,i);
-%         stem(t,y_pre(i,:));
-%     end
-% end
-% 
-% y_pre_norm = y_pre*1.0./max(y_pre,[],2);
-% %figure(3);
-% %stem(t,y1_pre);
-%  
-% %找起始点：
-% y_init=[find(y_pre_norm(1,:),1) find(y_pre_norm(2,:),1) find(y_pre_norm(3,:),1) find(y_pre_norm(4,:),1)];
 
 %% correlate
-% t_delay = [0 find_delay(y(1,:),y(2,:)) find_delay(y(1,:),y(3,:)) find_delay(y(1,:),y(4,:))] / fs;
+t_delay = [0 find_delay(y(1,:),y(2,:)) find_delay(y(1,:),y(3,:)) find_delay(y(1,:),y(4,:))] / fs;
 
 %% gccphat
-t_delay = [0 gccphat(y(2,:)',y(1,:)',fs) gccphat(y(3,:)',y(1,:)',fs) gccphat(y(4,:)',y(1,:)',fs)];
+% t_delay = [0 gccphat(y(2,:)',y(1,:)',fs) gccphat(y(3,:)',y(1,:)',fs) gccphat(y(4,:)',y(1,:)',fs)];
 
 %%
 
@@ -91,7 +64,11 @@ end
 
 theta_record = theta_record'
 
-err = theta_record - standard_angle;
+f_result = fopen([path,'result.txt'],'w');
+fprintf(f_result,'%d\n',theta_record);
+fclose(f_result);
+
+err = theta_record - angle;
 err = mod(err,360);
 err = err - 360 * (err>180);
 
